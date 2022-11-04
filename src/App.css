@@ -8,7 +8,7 @@ a {
   text-decoration: none;
 }
 .container {
-  max-width: 1200px;
+  max-width: 1422px;
   margin: auto;
   padding: 0 25px;
 }
@@ -36,6 +36,7 @@ nav ul {
 nav ul li {
   display: inline-block;
   margin-right: 20px;
+  font-weight: 600;
 }
 #cart-image {
   width: 30px;
@@ -399,7 +400,7 @@ td a {
 }
 .cart-info img {
   width: 80px;
-  height: 80px;
+  height: 100px;
   margin-right: 10px;
 }
 .total-price {
@@ -432,6 +433,7 @@ th:last-child {
   margin: auto;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2);
   overflow: hidden;
+  border-radius: 25px;
 }
 .form-container span {
   font-weight: bold;
@@ -448,7 +450,7 @@ th:last-child {
   max-width: 300px;
   padding: 0 20px;
   position: absolute;
-  top: 120px;
+  top: 100px;
   transition: transform 1s;
 }
 form input {
@@ -472,6 +474,7 @@ form .btn:focus {
 }
 #loginForm {
   left: -300px;
+  top: 140px;
 }
 #signupForm {
   left: 0;
@@ -495,6 +498,7 @@ form .btn:focus {
   align-items: center;
   justify-content: space-between;
   border-radius: 25px;
+  box-shadow: 0 0 12px 0 #0000003b;
 }
 .cart-img {
   display: flex;
@@ -512,4 +516,14 @@ form .btn:focus {
 }
 .header__sec a:hover {
   color: #ff523b;
+}
+.prod-card-footer{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.btn-card{
+  font-size: 14px;
+    font-weight: 600;
+    padding: 8px 16px;
 }

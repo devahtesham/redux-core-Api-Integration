@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../App.css";
 import "../mobile.css";
 import { Link, NavLink } from "react-router-dom";
@@ -10,30 +10,49 @@ import AppStore from "../assets/images/app-store.png";
 import { FaCartArrowDown } from "react-icons/fa";
 
 const Account = () => {
-  //   const loginForm = document.getElementById("loginForm")
-  // const signupForm = document.getElementById("signupForm")
-  // const indicator = document.getElementById("indicator");
+  const [loginBtn, setLoginBtn] = useState("");
+  const [signupBtn, setsignupBtn] = useState("");
+  const [indicator, setIndicator] = useState("");
+  const [loginForm, setLoginForm] = useState("");
+  const [signupForm, setSignupForm] = useState("");
 
+  const loginBtnRef = useRef(null); //login btn
+  const signupBtnRef = useRef(); //login bt
+  const indicatorRef = useRef(); // indicator
   const loginFormRef = useRef();
-  const loginForm = loginFormRef.current;
   const signupFormRef = useRef();
-  const signupForm = signupFormRef.current;
-  const indicatorRef = useRef();
-  const indicator = indicatorRef.current;
-  console.log("loginForm", loginForm);
-  console.log("signupForm", signupForm);
-  console.log("indicator", indicator);
+
+  useEffect(() => {
+    // console.log("loginbtn", loginBtnRef.current);
+    setLoginBtn(loginBtnRef.current);
+    // console.log("signupbtn", signupBtnRef.current);
+    setsignupBtn(signupBtnRef.current);
+    // console.log("indicator", indicatorRef.current);
+    setIndicator(indicatorRef.current);
+    // console.log("loginForm", loginFormRef.current);
+    setLoginForm(loginFormRef.current);
+    // console.log("signupForm", signupFormRef.current);
+    setSignupForm(signupFormRef.current);
+  }, []);
+  //
+
   // login btn
   const loginBtnHandler = (e) => {
-    // loginForm.style.transform = "translateX(300px)";
-    // signupForm.style.transform = "translateX(300px)";
-    // indicator.style.transform = "translateX(0px)";
+    // console.log("loginBtn", loginBtn);
+    // console.log("signupBtn", signupBtn);
+    // console.log("indicator", indicator);
+    // console.log("loginForm", loginForm);
+    // console.log("signupForm", signupForm);
+
+    loginForm.style.transform = "translateX(300px)";
+    signupForm.style.transform = "translateX(300px)";
+    indicator.style.transform = "translateX(0px)";
   };
   // signup btn
   const signupBtnHandler = (e) => {
-    // signupForm.style.transform = "translateX(0px)";
-    // loginForm.style.transform = "translateX(0px)";
-    // indicator.style.transform = "translateX(100px)";
+    signupForm.style.transform = "translateX(0px)";
+    loginForm.style.transform = "translateX(0px)";
+    indicator.style.transform = "translateX(100px)";
   };
   // login form
   const loginFormHandler = (e) => {};
@@ -103,20 +122,24 @@ const Account = () => {
                   <span
                     id="loginBtn"
                     onClick={loginBtnHandler}
-                    ref={loginFormRef}
+                    ref={loginBtnRef}
                   >
                     Login
                   </span>
                   <span
                     id="signupBtn"
                     onClick={signupBtnHandler}
-                    ref={signupFormRef}
+                    ref={signupBtnRef}
                   >
                     Register
                   </span>
                   <hr id="indicator" ref={indicatorRef} />
                 </div>
-                <form id="loginForm" onSubmit={loginFormHandler}>
+                <form
+                  id="loginForm"
+                  onSubmit={loginFormHandler}
+                  ref={loginFormRef}
+                >
                   <input type="text" placeholder="Username" />
                   <input type="password" placeholder="password" />
                   <button type="submit" className="btn">
@@ -124,7 +147,12 @@ const Account = () => {
                   </button>
                   <Link to="">Forgot password</Link>
                 </form>
-                <form id="signupForm" onSubmit={signupFormHandler}>
+                <form
+                  id="signupForm"
+                  onSubmit={signupFormHandler}
+                  ref={signupFormRef}
+                >
+                  <input type="text" placeholder="Your Name" />
                   <input type="text" placeholder="Username" />
                   <input type="email" placeholder="Email" />
                   <input type="password" placeholder="password" />
@@ -199,7 +227,9 @@ const Account = () => {
             </div>
           </div>
           <hr />
-          <p className="copyright">Copyright 2020 - Ahtesham Akram | Ak</p>
+          <p className="copyright">
+            Copyright 2020 - Ahtesham Akram | DevAhtesham
+          </p>
         </div>
       </div>
     </>
