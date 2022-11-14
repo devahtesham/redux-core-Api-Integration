@@ -1,25 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../App.css";
 import "../mobile.css";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import Logo from "../assets/images/logo.png";
 import { FaCartArrowDown } from "react-icons/fa";
 import Img1 from "../assets/images/image1.png";
 import Cat1 from "../assets/images/category-1.jpg";
 import Cat2 from "../assets/images/category-2.jpg";
 import Cat3 from "../assets/images/category-3.jpg";
-import P1 from "../assets/images/product-1.jpg";
-import P2 from "../assets/images/product-2.jpg";
-import P3 from "../assets/images/product-3.jpg";
-import P4 from "../assets/images/product-4.jpg";
-import P5 from "../assets/images/product-5.jpg";
-import P6 from "../assets/images/product-6.jpg";
-import P7 from "../assets/images/product-7.jpg";
-import P8 from "../assets/images/product-8.jpg";
-import P9 from "../assets/images/product-9.jpg";
-import P10 from "../assets/images/product-10.jpg";
-import P11 from "../assets/images/product-11.jpg";
-import P12 from "../assets/images/product-12.jpg";
 import U1 from "../assets/images/user-1.png";
 import U2 from "../assets/images/user-2.png";
 import U3 from "../assets/images/user-3.png";
@@ -31,15 +19,65 @@ import { FaQuoteLeft } from "react-icons/fa";
 import LogoWhite from "../assets/images/logo-white.png";
 import PlayStore from "../assets/images/play-store.png";
 import AppStore from "../assets/images/app-store.png";
+import { FEATURED__PROD, LATEST__PROD } from "../components/Data";
+import { useDispatch, useSelector } from "react-redux";
+import { AddToCartAction } from "../store/Actions/AddToCartAction";
+import { dbCollection, getDocs } from "../firebase/firebase";
 
 const Home = () => {
+  const [cartProd, setCartProd] = useState([]);
+  const navigate = useNavigate();
+  const islogin = localStorage.getItem("uid");
+  // to access global states
+  const selctor = useSelector((state) => state.addToCartReducer);
+  // dispatch action
+  const dispatch = useDispatch();
+  // effect for manage route
+  useEffect(() => {
+    if (!islogin) {
+      navigate("/");
+    }
+  }, []);
+  // get cart products data
+  let allProducts = [];
+  const getCartProducts = async () => {
+    const snapShot = await getDocs(dbCollection);
+    // console.log(snapShot.docs.length);
+    snapShot.forEach((doc) => {
+      allProducts.push(doc.data());
+    });
+    // console.log("product added in final array");
+    setCartProd([...allProducts]);
+    console.log("allProducts", allProducts);
+  };
+  // to get firebase data when global state length changes
+  useEffect(() => {
+    getCartProducts();
+  }, [selctor.cartItems]);
+
+  // call on every add to cart button click
+  const cartHandle = (prod) => {
+    const itemsId = cartProd.map((item) => item.prodId);
+    // console.log("itemsId", itemsId);
+
+    if (itemsId.includes(prod.prodId)) {
+      alert("product already present");
+      return;
+    } else {
+      dispatch(AddToCartAction(prod));
+    }
+  };
+  const logoutHandler = () => {
+    localStorage.removeItem("uid");
+  };
+
   return (
     <>
       {/* <!-- --------------------header-section------------------------------- --> */}
       <div className="header">
         <div className="container">
           <section className="header__sec">
-            <div className="container">
+            <div className="navbar-container">
               <div className="navbar">
                 <div className="logo">
                   <Link to="/">
@@ -47,6 +85,15 @@ const Home = () => {
                   </Link>
                 </div>
                 <nav>
+                  <div>
+                    <Link
+                      to={"/"}
+                      onClick={logoutHandler}
+                      className="btn btn-logout"
+                    >
+                      Log Out
+                    </Link>
+                  </div>
                   <ul id="menuItems">
                     <li>
                       <NavLink
@@ -82,7 +129,9 @@ const Home = () => {
                     <span className="cart-counter">
                       <h5>Your Cart</h5>
                     </span>
-                    <span className="cart-counter counter">0</span>
+                    <span className="cart-counter counter">
+                      {cartProd.length}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -132,634 +181,136 @@ const Home = () => {
         </h2>
         <div className="row">
           {/* <!-- product-1 --> */}
-          <div className="col-4">
-            <img src={P1} alt="product-1" />
-            <h4>Red Printed T-Shirt</h4>
-            <div className="rating">
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarHalf
-                size={20}
-                color={"#ff523b"}
-                style={{ marginBottom: "5px" }}
-              />
+          {FEATURED__PROD.map((prod) => (
+            <div className="col-4" key={prod.prodId}>
+              <img src={prod.prodImg} alt={prod.prodId} />
+              <h4>{prod.prodName}</h4>
+              <div className="rating">
+                <BsStarFill
+                  size={20}
+                  color={"#ff523b"}
+                  style={{
+                    marginRight: "6px",
+                    marginBottom: "5px",
+                    marginTop: "3px",
+                  }}
+                />
+                <BsStarFill
+                  size={20}
+                  color={"#ff523b"}
+                  style={{
+                    marginRight: "6px",
+                    marginBottom: "5px",
+                    marginTop: "3px",
+                  }}
+                />
+                <BsStarFill
+                  size={20}
+                  color={"#ff523b"}
+                  style={{
+                    marginRight: "6px",
+                    marginBottom: "5px",
+                    marginTop: "3px",
+                  }}
+                />
+                <BsStarFill
+                  size={20}
+                  color={"#ff523b"}
+                  style={{
+                    marginRight: "6px",
+                    marginBottom: "5px",
+                    marginTop: "3px",
+                  }}
+                />
+                <BsStarHalf
+                  size={20}
+                  color={"#ff523b"}
+                  style={{ marginBottom: "5px" }}
+                />
+              </div>
+              <div className="prod-card-footer">
+                <p>{prod.prodPrice}</p>
+                <button className="btn">
+                  <Link
+                    className="btn-card"
+                    onClick={() => {
+                      cartHandle(prod);
+                    }}
+                  >
+                    {cartProd.map((prod) => prod.prodId).includes(prod.prodId)
+                      ? "Product added"
+                      : "Add To Cart"}
+                  </Link>
+                </button>
+              </div>
             </div>
-            <div className="prod-card-footer">
-              <p>$50.00</p>
-              <Link className="btn btn-card">Add To Cart </Link>
-            </div>
-          </div>
-          {/* <!-- product-2 --> */}
-          <div className="col-4">
-            <img src={P2} alt="product-1" />
-            <h4>Shoes</h4>
-            <div className="rating">
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStar
-                size={20}
-                color={"#ff523b"}
-                style={{ marginBottom: "5px" }}
-              />
-            </div>
-            <div className="prod-card-footer">
-              <p>$40.00</p>
-              <Link className="btn btn-card">Add To Cart </Link>
-            </div>
-          </div>
-          {/* <!-- product-3 --> */}
-          <div className="col-4">
-            <img src={P3} alt="product-1" />
-            <h4>Branded Trouser</h4>
-            <div className="rating">
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarHalf
-                size={20}
-                color={"#ff523b"}
-                style={{ marginBottom: "5px" }}
-              />
-            </div>
-            <div className="prod-card-footer">
-              <p>$32.00</p>
-              <Link className="btn btn-card">Add To Cart </Link>
-            </div>
-          </div>
-          {/* <!-- product-4 --> */}
-          <div className="col-4">
-            <img src={P4} alt="product-1" />
-            <h4>Blue polo T-Shirt</h4>
-            <div className="rating">
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarHalf
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStar
-                size={20}
-                color={"#ff523b"}
-                style={{ marginBottom: "5px" }}
-              />
-            </div>
-            <div className="prod-card-footer">
-              <p>$50.00</p>
-              <Link className="btn btn-card">Add To Cart </Link>
-            </div>
-          </div>
+          ))}
         </div>
         {/* <!-- --------------Latest Products------------------ --> */}
         <h2 className="title">Latest Products</h2>
         <div className="row">
-          {/* <!-- product-5 --> */}
-          <div className="col-4">
-            <img src={P5} alt="product-1" />
-            <h4>Grey Shoes</h4>
-            <div className="rating">
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStar
-                size={20}
-                color={"#ff523b"}
-                style={{ marginBottom: "5px" }}
-              />
+          {LATEST__PROD.map((prod) => (
+            <div className="col-4" key={prod.prodId}>
+              <img src={prod.prodImg} alt={prod.prodId} />
+              <h4>{prod.prodName}</h4>
+              <div className="rating">
+                <BsStarFill
+                  size={20}
+                  color={"#ff523b"}
+                  style={{
+                    marginRight: "6px",
+                    marginBottom: "5px",
+                    marginTop: "3px",
+                  }}
+                />
+                <BsStarFill
+                  size={20}
+                  color={"#ff523b"}
+                  style={{
+                    marginRight: "6px",
+                    marginBottom: "5px",
+                    marginTop: "3px",
+                  }}
+                />
+                <BsStarFill
+                  size={20}
+                  color={"#ff523b"}
+                  style={{
+                    marginRight: "6px",
+                    marginBottom: "5px",
+                    marginTop: "3px",
+                  }}
+                />
+                <BsStarFill
+                  size={20}
+                  color={"#ff523b"}
+                  style={{
+                    marginRight: "6px",
+                    marginBottom: "5px",
+                    marginTop: "3px",
+                  }}
+                />
+                <BsStar
+                  size={20}
+                  color={"#ff523b"}
+                  style={{ marginBottom: "5px" }}
+                />
+              </div>
+              <div className="prod-card-footer">
+                <p>{prod.prodPrice}</p>
+                <Link
+                  className="btn btn-card"
+                  onClick={() => {
+                    cartHandle(prod);
+                  }}
+                >
+                  {cartProd.map((prod) => prod.prodId).includes(prod.prodId)
+                    ? "Product added"
+                    : "Add To Cart"}
+                </Link>
+              </div>
             </div>
-            <div className="prod-card-footer">
-              <p>$20.00</p>
-              <Link className="btn btn-card">Add To Cart </Link>
-            </div>
-          </div>
-          {/* <!-- product-6 --> */}
-          <div className="col-4">
-            <img src={P6} alt="product-1" />
-            <h4>Black Puma T-Shirt</h4>
-            <div className="rating">
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarHalf
-                size={20}
-                color={"#ff523b"}
-                style={{ marginBottom: "5px" }}
-              />
-            </div>
-            <div className="prod-card-footer">
-              <p>$50.00</p>
-              <Link className="btn btn-card">Add To Cart </Link>
-            </div>
-          </div>
-          {/* <!-- product-7 --> */}
-          <div className="col-4">
-            <img src={P7} alt="product-1" />
-            <h4>Pack of socks</h4>
-            <div className="rating">
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarHalf
-                size={20}
-                color={"#ff523b"}
-                style={{ marginBottom: "5px" }}
-              />
-            </div>
-            <div className="prod-card-footer">
-              <p>$20.00</p>
-              <Link className="btn btn-card">Add To Cart </Link>
-            </div>
-          </div>
-          {/* <!-- product-8 --> */}
-          <div className="col-4">
-            <img src={P8} alt="product-1" />
-            <h4>Fossil Hand Watch</h4>
-            <div className="rating">
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarHalf
-                size={20}
-                color={"#ff523b"}
-                style={{ marginBottom: "5px" }}
-              />
-            </div>
-            <div className="prod-card-footer">
-              <p>$60.00</p>
-              <Link className="btn btn-card">Add To Cart </Link>
-            </div>
-          </div>
-          {/* <!-- product-9 --> */}
-          <div className="col-4">
-            <img src={P9} alt="product-1" />
-            <h4>Rollex Hand Watch</h4>
-            <div className="rating">
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarHalf
-                size={20}
-                color={"#ff523b"}
-                style={{ marginBottom: "5px" }}
-              />
-            </div>
-            <div className="prod-card-footer">
-              <p>$60.00</p>
-              <Link className="btn btn-card">Add To Cart </Link>
-            </div>
-          </div>
-          {/* <!-- product-10 --> */}
-          <div className="col-4">
-            <img src={P10} alt="product-1" />
-            <h4>Nike Shoes</h4>
-            <div className="rating">
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{ marginBottom: "5px" }}
-              />
-            </div>
-            <div className="prod-card-footer">
-              <p>$50.00</p>
-              <Link className="btn btn-card">Add To Cart </Link>
-            </div>
-          </div>
-
-          {/* <!-- product-11 --> */}
-          <div className="col-4">
-            <img src={P11} alt="product-1" />
-            <h4>Addidas Shoes</h4>
-            <div className="rating">
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStar
-                size={20}
-                color={"#ff523b"}
-                style={{ marginBottom: "5px" }}
-              />
-            </div>
-            <div className="prod-card-footer">
-              <p>$30.00</p>
-              <Link className="btn btn-card">Add To Cart </Link>
-            </div>
-          </div>
-          {/* <!-- product-12 --> */}
-          <div className="col-4">
-            <img src={P12} alt="product-1" />
-            <h4>Black Trouser</h4>
-            <div className="rating">
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarFill
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStarHalf
-                size={20}
-                color={"#ff523b"}
-                style={{
-                  marginRight: "6px",
-                  marginBottom: "5px",
-                  marginTop: "3px",
-                }}
-              />
-              <BsStar
-                size={20}
-                color={"#ff523b"}
-                style={{ marginBottom: "5px" }}
-              />
-            </div>
-            <div className="prod-card-footer">
-              <p>$50.00</p>
-              <Link className="btn btn-card">Add To Cart </Link>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
       {/* ------------ offer section ----------- */}

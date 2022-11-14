@@ -23,11 +23,16 @@ body {
 .navbar {
   display: flex;
   align-items: center;
-  padding: 20px;
+  justify-content: space-between;
+}
+.account-nav {
+  padding: 20px 0;
 }
 nav {
-  flex: 1;
-  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 45%;
 }
 nav ul {
   list-style: none;
@@ -67,13 +72,18 @@ nav ul li {
   display: inline-block;
   color: #fff;
   background-color: #ff523b;
-  padding: 8px 30px;
+  padding: 8px;
   margin: 30px 0;
   border-radius: 30px;
   transition: background 0.5s;
+  border: none;
+  outline: 0;
+}
+.btn-logout {
+  padding: 6px 20px;
 }
 .btn:hover {
-  background: #563434;
+  background: #000;
 }
 .header {
   background: radial-gradient(#fff, #ffd6d6);
@@ -368,7 +378,7 @@ select:focus {
 }
 /* --------------------------------cart-page---------------- */
 .cart-page {
-  margin: 80px auto;
+  margin: 140px auto;
 }
 table {
   width: 100%;
@@ -517,13 +527,32 @@ form .btn:focus {
 .header__sec a:hover {
   color: #ff523b;
 }
-.prod-card-footer{
+.prod-card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.btn-card{
+.btn-card {
   font-size: 14px;
-    font-weight: 600;
-    padding: 8px 16px;
+  font-weight: 600;
+  padding: 8px 16px;
+  color: #fff;
+}
+section.header__sec {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: radial-gradient(#fff, #ffd6d6);
+  z-index: 99;
+}
+.navbar-container {
+  max-width: 1280px;
+  margin: auto;
+}
+.cart-user {
+  text-align: center;
+  font-size: 23px;
+  margin-bottom: 25px;
+  color: #ff523b;
 }

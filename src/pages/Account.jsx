@@ -1,26 +1,66 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../App.css";
 import "../mobile.css";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import Logo from "../assets/images/logo.png";
 import LogoWhite from "../assets/images/logo-white.png";
 import Img1 from "../assets/images/image1.png";
 import PlayStore from "../assets/images/play-store.png";
 import AppStore from "../assets/images/app-store.png";
 import { FaCartArrowDown } from "react-icons/fa";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  doc,
+  db,
+  setDoc,
+} from "../firebase/firebase";
 
 const Account = () => {
+  const navigate = useNavigate();
+  const islogin = localStorage.getItem("uid");
+  useEffect(() => {
+    if (islogin) {
+      navigate("/home");
+    }
+  });
+  //firebse authentication
+  const auth = getAuth();
+  // states for styling
   const [loginBtn, setLoginBtn] = useState("");
   const [signupBtn, setsignupBtn] = useState("");
   const [indicator, setIndicator] = useState("");
   const [loginForm, setLoginForm] = useState("");
   const [signupForm, setSignupForm] = useState("");
-
+  // refs for styling
   const loginBtnRef = useRef(null); //login btn
-  const signupBtnRef = useRef(); //login bt
-  const indicatorRef = useRef(); // indicator
-  const loginFormRef = useRef();
-  const signupFormRef = useRef();
+  const signupBtnRef = useRef(null); //login bt
+  const indicatorRef = useRef(null); // indicator
+  const loginFormRef = useRef(null);
+  const signupFormRef = useRef(null);
+
+  // signup/login form handle states & functions
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setpassword] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const userNameHandler = (e) => {
+    setFullName(e.target.value);
+  };
+  const emailHandler = (e) => {
+    setEmail(e.target.value);
+  };
+  const passwordHandler = (e) => {
+    setpassword(e.target.value);
+  };
+  const loginEmailHandler = (e) => {
+    setLoginEmail(e.target.value);
+  };
+  const loginPasswordHandler = (e) => {
+    setLoginPassword(e.target.value);
+  };
 
   useEffect(() => {
     // console.log("loginbtn", loginBtnRef.current);
@@ -55,14 +95,60 @@ const Account = () => {
     indicator.style.transform = "translateX(100px)";
   };
   // login form
-  const loginFormHandler = (e) => {};
+  const loginFormHandler = (e) => {
+    e.preventDefault();
+    if (!loginEmail || !loginPassword) {
+      alert("Please Enter Valid Details");
+      return;
+    } else {
+      signInWithEmailAndPassword(auth, loginEmail, loginPassword)
+        .then((cred) => {
+          console.log("credentials", cred);
+          localStorage.setItem("uid", cred.user.uid);
+          setLoginEmail("");
+          setLoginPassword("");
+          navigate("/home");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
   // signup form
-  const signupFormHandler = (e) => {};
+  const signupFormHandler = (e) => {
+    e.preventDefault();
+    if (!fullName || !email || !password) {
+      alert("Please Enter Valid Details");
+      return;
+    } else {
+      // console.log(fullName, email, password);
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(async (cred) => {
+          console.log("credentials", cred);
+          // add user data to firestore
+          const myObj = {
+            name: fullName,
+            email: email,
+            uid: cred.user.uid,
+          };
+          const docRef = doc(db, "users", cred.user.uid);
+          await setDoc(docRef, myObj);
+          // we use set doc instead of add doc bcz we want to make custom id
+          setFullName("");
+          setEmail("");
+          setpassword("");
+          loginBtnHandler();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
   return (
     <>
       <section className="header__sec">
         <div className="container">
-          <div className="navbar">
+          <div className="navbar account-nav">
             <div className="logo">
               <Link to="/">
                 <img src={Logo} alt="logo" className="logo-image" />
@@ -96,7 +182,7 @@ const Account = () => {
                 </li>
               </ul>
             </nav>
-            <div>
+            {/* <div>
               <div className="bucket-container">
                 <span className="cart-img">
                   <FaCartArrowDown size={23} />
@@ -106,7 +192,7 @@ const Account = () => {
                 </span>
                 <span className="cart-counter counter">0</span>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </section>
@@ -135,27 +221,53 @@ const Account = () => {
                   </span>
                   <hr id="indicator" ref={indicatorRef} />
                 </div>
+                {/* // login form */}
                 <form
                   id="loginForm"
                   onSubmit={loginFormHandler}
                   ref={loginFormRef}
                 >
-                  <input type="text" placeholder="Username" />
-                  <input type="password" placeholder="password" />
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={loginEmail}
+                    onChange={loginEmailHandler}
+                  />
+                  <input
+                    type="password"
+                    placeholder="password"
+                    value={loginPassword}
+                    onChange={loginPasswordHandler}
+                  />
                   <button type="submit" className="btn">
                     Login
                   </button>
                   <Link to="">Forgot password</Link>
                 </form>
+                {/* // signup form */}
                 <form
                   id="signupForm"
                   onSubmit={signupFormHandler}
                   ref={signupFormRef}
                 >
-                  <input type="text" placeholder="Your Name" />
-                  <input type="text" placeholder="Username" />
-                  <input type="email" placeholder="Email" />
-                  <input type="password" placeholder="password" />
+                  <input
+                    type="text"
+                    placeholder="Username"
+                    value={fullName}
+                    onChange={userNameHandler}
+                  />
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={emailHandler}
+                  />
+                  <input
+                    type="password"
+                    placeholder="password"
+                    value={password}
+                    onChange={passwordHandler}
+                  />
                   <button type="submit" className="btn">
                     Register
                   </button>

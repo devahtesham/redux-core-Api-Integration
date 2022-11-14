@@ -1,4 +1,9 @@
 /* -------------------------media query for menue icon------------------------ */
+@media only screen and (max-width: 1366px) {
+  .container {
+    max-width: 1246px;
+  }
+}
 @media only screen and (max-width: 800px) {
   nav ul {
     position: absolute;
