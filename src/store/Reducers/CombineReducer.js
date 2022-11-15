@@ -1,7 +1,8 @@
 import { combineReducers } from "redux";
-import AddCartReducer from "./AddCartReducer";
+import { AddProductReducers, GetProductReducers } from "./ProductReducers";
 
-const Combine = combineReducers({
-  addToCartReducer: AddCartReducer,
+const CombineReducer = combineReducers({
+  GetProductReducers: GetProductReducers,
+  AddProductReducers: AddProductReducers,
 });
-export default Combine;
+export default CombineReducer;
